@@ -83,7 +83,7 @@
             }
           })
             .then(res => {
-              if (res.data.Code == 1 && res.data.ShortUrl !== "") {
+              if (res.data.Code === 1 && res.data.ShortUrl !== "") {
                 this.shortUrl = res.data.ShortUrl;
                 this.$copyText(this.shortUrl)
                 this.$refs.shortUrl.disabled = true
