@@ -74,14 +74,16 @@
 
           this.loading = true
 
-          let data = new FormData();
-          data.append("longUrl", btoa(this.longUrl));
-          data.append("shortKey", this.shortUrl.indexOf('http') < 0 ? this.shortUrl : '');
-          axios.post('/short', data, {
-            header: {
-              "Content-Type": "application/form-data; charset=utf-8"
-            }
-          })
+            let data = new URLSearchParams();
+            data.append("longUrl", btoa(this.longUrl));
+            data.append("shortKey", this.shortUrl.indexOf('http') < 0 ? this.shortUrl : '');
+            
+            // 发送 POST 请求，Content-Type 设置为 application/x-www-form-urlencoded
+            axios.post('/short', data.toString(), {
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+              }
+            });
             .then(res => {
               if (res.data.Code === 1 && res.data.ShortUrl !== "") {
                 this.shortUrl = res.data.ShortUrl;
