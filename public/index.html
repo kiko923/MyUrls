@@ -10,13 +10,16 @@
   <!--<script src="https://unpkg.com/axios@0.19.2/dist/axios.min.js"></script>-->
   <!--<script src="https://unpkg.com/element-ui@2.13.0/lib/index.js"></script>-->
   <!--<script src="https://cdn.jsdelivr.net/npm/vue-clipboard2@0.3.1/dist/vue-clipboard.min.js"></script>-->
-    <!--字节静态资源CDN-->
+
+  <!-- 引入 jQuery -->
+  <!--<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="application/javascript"></script>-->
+  <!-- 字节静态资源CDN -->
   <link href="//lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.13.0/theme-chalk/index.css" type="text/css" rel="stylesheet" />
   <script src="//lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.11/vue.min.js" type="application/javascript"></script>
-  <script src="//lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/axios/0.19.2/axios.min.js" type="application/javascript"></script>
   <script src="//lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.13.0/index.js" type="application/javascript"></script>
   <script src="//lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue-clipboard2/0.3.1/vue-clipboard.min.js" type="application/javascript"></script>
-    <!--字节静态资源CDN-->
+  <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js" type="application/javascript"></script>
+  <!-- 字节静态资源CDN -->
 </head>
 
 <body>
@@ -77,28 +80,29 @@
             let data = new URLSearchParams();
             data.append("longUrl", btoa(this.longUrl));
             data.append("shortKey", this.shortUrl.indexOf('http') < 0 ? this.shortUrl : '');
-            
-            // 发送 POST 请求，Content-Type 设置为 application/x-www-form-urlencoded
-            axios.post('/short', data.toString(), {
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+
+            // 使用 jQuery 的 ajax 方法代替 axios
+            $.ajax({
+              url: '/short',
+              type: 'POST',
+              data: data.toString(),
+              contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+              success: (res) => {
+                if (res.Code === 1 && res.ShortUrl !== "") {
+                  this.shortUrl = res.ShortUrl;
+                  this.$copyText(this.shortUrl)
+                  this.$refs.shortUrl.disabled = true
+                  this.$message.success("短链接已复制到剪贴板");
+                } else {
+                  this.$message.error("短链接获取失败：" + res.Message);
+                }
+              },
+              error: () => {
+                this.$message.error("短链接获取失败");
+              },
+              complete: () => {
+                this.loading = false;
               }
-            });
-            .then(res => {
-              if (res.data.Code === 1 && res.data.ShortUrl !== "") {
-                this.shortUrl = res.data.ShortUrl;
-                this.$copyText(this.shortUrl)
-                this.$refs.shortUrl.disabled = true
-                this.$message.success("短链接已复制到剪贴板");
-              } else {
-                this.$message.error("短链接获取失败：" + res.data.Message);
-              }
-            })
-            .catch(() => {
-              this.$message.error("短链接获取失败");
-            })
-            .finally(() => {
-              this.loading = false;
             });
         },
         goToGayHub() {
